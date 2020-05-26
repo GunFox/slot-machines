@@ -1,17 +1,24 @@
 <template>
   <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+    <div class="slotMhchineBox">
+      <slotMachines ref="slotMachines"/>
+    </div>
+    <button @click="handleRandomNumbers">random</button>
   </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+import slotMachines from './components/slotMachines.vue'
 
 export default {
   name: 'App',
   components: {
-    HelloWorld
+    slotMachines
+  },
+  methods: {
+    handleRandomNumbers() {
+      this.$refs.slotMachines.numbersByRandom()
+    }
   }
 }
 </script>
@@ -24,5 +31,10 @@ export default {
   text-align: center;
   color: #2c3e50;
   margin-top: 60px;
+}
+.slotMhchineBox {
+  height: 180px;
+  overflow: hidden;
+  border: 1px solid #000;
 }
 </style>
