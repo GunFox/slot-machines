@@ -37,4 +37,16 @@ export default {
   overflow: hidden;
   border: 1px solid #000;
 }
+button  {
+  font-size: 18px;
+  background: cornflowerblue;
+  text-align: center;
+  line-height: 40px;
+  border: none;
+  color: #fff;
+  margin-top: 20px;
+  outline: none;
+  border-radius: 8px;
+  box-shadow: 1px 1px 10px rgba(0,0,0,.3);
+}
 </style>

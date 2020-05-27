@@ -108,9 +108,9 @@
 
 <style scoped>
 .slot-machines {
-    margin-left: 100px;
     display: flex;
     align-items: center;
+    background: #ddd;
 }
 .slot-machines .list.listAnimal {
     transition-property: transform;
@@ -122,21 +122,26 @@
     width: 120px;
     height: 180px;
     transform: rotateX(0deg);
+    margin-right: 2px;
+}
+.slot-machines .list:last-child {
+    margin-right: 0;
 }
 .slot-machines .item{
     position: absolute;
-    left: 50%;
+    left: 0;
     top: 50%;
     border: 0px solid rgba(0, 0, 0, 0);
     box-sizing: border-box;
     background-image: url("../assets/images/numStrap.png");
     background-repeat: no-repeat;
-    background-size: 100% 900px;
+    background-size: 100% 1000%;
     background-position: 0 0;
     background-color: #fff;
-    width: 120px;
+    width: 100%;
     height: 90px;
-    margin-left: -60px;
     margin-top: -45px;
+    /* border-left: 1px solid #f17e7e;
+    border-right: 1px solid #f17e7e; */
 }
 </style>
