@@ -15,18 +15,18 @@
     export default {
         data() {
             return {
-                itemlength: 20,
-                perAngleH: 0,
-                numbers: [0, 0, 0, 0, 0],
+                itemlength: 20, //每列item的长度
+                perAngleH: 0, //一度对应item的高度
+                numbers: [0, 0, 0, 0, 0], //号码
                 listAnimal: false,
-                perAngle: 0,
+                perAngle: 0, //每个item对应的度数
                 touchStatus: false,
-                startY: 0,
-                endY: 0,
-                startAngle: 0
+                startY: 0, //触摸开始时的Y值
+                endY: 0, //触摸结束时的Y值
+                startAngle: 0 //触摸开始时的角度
             }
         },
-        mounted() {
+        mounted() { //初始化数据
             this.perAngle = 360/this.itemlength;
             this.perAngleH = this.$refs.item[0].clientHeight / this.perAngle;
             this.$refs.item.forEach((item, index) => {
