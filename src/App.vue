@@ -1,9 +1,10 @@
 <template>
   <div id="app">
     <div class="slotMhchineBox">
-      <slotMachines ref="slotMachines"/>
+      <slotMachines ref="slotMachines" :lotterynumnber="lotteryNumber" @update="updateLottryNums"/>
     </div>
-    <button @click="handleRandomNumbers">random</button>
+    <button @click="handleRandomNumbers">随机</button>
+    <button @click="handleResetNumbers">重置</button>
   </div>
 </template>
 
@@ -12,13 +13,24 @@ import slotMachines from './components/slotMachines.vue'
 
 export default {
   name: 'App',
+  data() {
+    return {
+      lotteryNumber: "",
+    }
+  },
   components: {
     slotMachines
   },
   methods: {
     handleRandomNumbers() {
       this.$refs.slotMachines.numbersByRandom()
-    }
+    },
+    handleResetNumbers() {
+      this.$refs.slotMachines.resetNumbers();
+    },
+    updateLottryNums(numbers) {
+          this.lotteryNumber = numbers;
+    },
   }
 }
 </script>

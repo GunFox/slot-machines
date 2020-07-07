@@ -11,8 +11,10 @@
 </template>
 
 <script>
-    import random from "lodash/random"
     export default {
+        props: {
+            lotterynumnber: String //接受外部初始化号码
+        },
         data() {
             return {
                 itemlength: 20, //每列item的长度
@@ -23,19 +25,56 @@
                 touchStatus: false,
                 startY: 0, //触摸开始时的Y值
                 endY: 0, //触摸结束时的Y值
-                startAngle: 0 //触摸开始时的角度
+                startAngle: 0, //触摸开始时的角度,
+                roundAnimal: false, //防止重复调用随机模式
+                updateTimeout: null //随机模式下返回新的号码定时器，增强交互性
             }
         },
-        mounted() { //初始化数据
-            this.perAngle = 360/this.itemlength;
-            this.perAngleH = this.$refs.item[0].clientHeight / this.perAngle;
-            this.$refs.item.forEach((item, index) => {
-                let result = this.setStyle(index);
-                item.style.transform = result.transform;
-                item.style.backgroundPosition = result.backgroundPosition;
-            });
+        mounted() { //页面不存在缓存时初始化老虎机动画
+            this.init();
+        },
+        activated() { //页面存在缓存时初始化老虎机数据
+            this.init();
+        },
+        watch: {
+            lotterynumnber(now, old) { //重置初始化时不再触发滚动动画
+            console.log(34444)
+                if(old && !now) {
+                    this.$refs.list.forEach((item, index) => {
+                        item.style.transitionDuration = "0s";
+                        let MoveAngle = 0;
+                        this.setListTransform(index, MoveAngle);
+                    });
+                    clearTimeout(this.updateTimeout);
+                    this.updateTimeout = null;
+                    this.numbers = [0, 0, 0, 0, 0];
+                }
+            }
         },
         methods: {
+            init() {
+                this.perAngle = 360/this.itemlength;
+                this.perAngleH = this.$refs.item[0].clientHeight / this.perAngle;
+                this.$refs.item.forEach((item, index) => {
+                    let result = this.setStyle(index);
+                    item.style.transform = result.transform;
+                    item.style.backgroundPosition = result.backgroundPosition;
+                });
+            },
+            resetNumbers() {
+                if(this.roundAnimal) {
+                    this.roundAnimal = !this.roundAnimal;
+                }
+                this.$refs.list.forEach((item, index) => {
+                    item.style.transitionDuration = "0s";
+                    let MoveAngle = 0;
+                    this.setListTransform(index, MoveAngle);
+                });
+                clearTimeout(this.updateTimeout);
+                this.updateTimeout = null;
+                this.numbers = [0, 0, 0, 0, 0];
+                this.updateNumbers();
+            },
             setStyle(index) { //根据每个item的高度和对应的角度计算偏移量
                 let itemHeight = this.$refs.item[0].clientHeight;
                 let zLength = this.tzLength(itemHeight / 2, this.perAngle / 2);
@@ -44,35 +83,43 @@
                     backgroundPosition: `0 ${(index % 10) * itemHeight * -1}px`
                 };
             },
-            getCurrentAngle(index) {
+            getCurrentAngle(index) { //获取每个item的当前角度
                 return this.$refs.list[index].style.transform.slice(8, -4) * 1;
             },
-            getCurrentNumsByAngle(angle) {
+            getCurrentNumsByAngle(angle) { //根据角度获取对应的数字
                 let temp = angle%360 >= 0 ? angle%360/this.perAngle : (360+angle%360)/this.perAngle;
                 return temp%10;
             },
-            tzLength(long, angle) {
+            tzLength(long, angle) { //计算出每个item沿Z轴平移距离
                 return (
                     Math.round((long / Math.tan((angle * Math.PI) / 180)) * 100000) / 100000
                 );
             },
-            setListTransform(index, angle) {
+            setListTransform(index, angle) { //设置item应旋转的角度
                 this.$refs.list[index].style.transform = `rotateX(${angle}deg)`;
             },
-            numbersByRandom() {
+            numbersByRandom() { //提供给外部调用随机生成号码功能
+                if(this.roundAnimal) { //防止重复调用
+                    return false;
+                }
+                this.roundAnimal = !this.roundAnimal;
                 let newNumbers = [0,0,0,0,0].map(() => {
-                    return random(0, 9)
-                })
+                    return Math.floor(Math.random()*10);
+                });
                 this.listAnimal = true;
                 this.$refs.list.forEach((item, index) => {
                     item.style.transitionDuration = 7 + index * 0.2 + "s";
                     let current = this.getCurrentAngle(index);
                     let MoveAngle = (newNumbers[index] - this.numbers[index]) * this.perAngle + 720 + current;
                     this.setListTransform(index, MoveAngle);
-                })
+                });
                 this.numbers = newNumbers;
+                this.updateTimeout = setTimeout(() => { //延时返回数据，增强交互性
+                    this.updateNumbers();
+                    this.roundAnimal = !this.roundAnimal;
+                },7800);
             },
-            handleTouchStart(e ,index) {
+            handleTouchStart(e ,index) { //触摸开始
                 document.body.style.overflow = "hidden";
                 this.touchStatus = true;
                 let touch = e.targetTouches[0];
@@ -80,7 +127,7 @@
                 this.$refs.list[index].style.transitionDuration = "";
                 this.startAngle = this.getCurrentAngle(index);
             },
-            handleTouchMove(e, index) {
+            handleTouchMove(e, index) { //触摸移动
                 if (this.touchStatus) {
                     let touch = e.targetTouches[0];
                     this.endY = touch.pageY;
@@ -89,19 +136,23 @@
                     this.setListTransform(index, MoveAngle);
                 }   
             },
-            handleTouchEnd(e, index) {
+            handleTouchEnd(e, index) { //触摸结束
                 let currentAngle = this.getCurrentAngle(index);
                 let MoveAngle =
-                    (currentAngle % this.perAngle + this.perAngle) % this.perAngle >= this.perAngle / 2
-                    ? Math.ceil(currentAngle / this.perAngle) * this.perAngle
-                    : Math.floor(currentAngle / this.perAngle) * this.perAngle;
+                        (currentAngle % this.perAngle + this.perAngle) % this.perAngle >= this.perAngle / 2
+                            ? Math.ceil(currentAngle / this.perAngle) * this.perAngle
+                            : Math.floor(currentAngle / this.perAngle) * this.perAngle;
                 this.$refs.list[index].style.transitionDuration = "500ms";
                 this.setListTransform(index, MoveAngle);
                 this.numbers.splice(index, 1, this.getCurrentNumsByAngle(MoveAngle));
                 this.touchStatus = false;
                 this.endY = this.startY = this.startAngle = 0;
                 document.body.style.overflow = "auto";
+                this.updateNumbers();
             },
+            updateNumbers() { //更新父组件号码
+                this.$emit("update", this.numbers.join(""));
+            }
         },
     }
 </script>
